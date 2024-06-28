@@ -1,1 +1,1 @@
-# Machine-learning
+# 머신러닝 학습일지
