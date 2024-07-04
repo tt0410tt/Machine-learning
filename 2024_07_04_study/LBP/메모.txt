@@ -1,0 +1,3 @@
+C:\Users\user>C:/Users/user/AppData/Local/Programs/Python/Python312/python.exe C:/Users/user/Desktop/workspace/main/Machine-learning/2024_07_04_study/LBP/recognize.py -t C:/Users/user/Desktop/workspace/main/Machine-learning/2024_07_04_study/LBP/images/training -e C:/Users/user/Desktop/workspace/main/Machine-learning/2024_07_04_study/LBP/images/testing
+
+실행명령문 다만 실패함. 이유는 학습한 후 다시 올리는게 좋을듯

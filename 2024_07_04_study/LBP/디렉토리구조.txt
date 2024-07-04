@@ -1,0 +1,18 @@
+$ tree --dirsfirst -L 3
+.
+├── images
+│   ├── testing
+│   │   ├── area_rug.jpeg
+│   │   ├── wallpaper.jpeg
+│   │   ├── keyboard.jpeg
+│   │   └── tile.jpeg
+│   └── training
+│       ├── area_rug [4 entries]
+│       ├── wallpaper [4 entries]
+│       ├── keyboard [4 entries]
+│       └── tile [4 entries]
+├── pyimagesearch
+│   ├── __init__.py
+│   └── localbinarypatterns.py
+└── recognize.py
+8 directories, 7 files
