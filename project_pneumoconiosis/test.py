@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 # 데이터셋 경로 설정
-data_path = ''
+data_path = '../../data_pneumoconiosis/'
 train_normal_path = os.path.join(data_path, 'train/NORMAL')
 train_pneumonia_path = os.path.join(data_path, 'train/PNEUMONIA')
 test_normal_path = os.path.join(data_path, 'test/NORMAL')
