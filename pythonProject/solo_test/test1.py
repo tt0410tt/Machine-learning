@@ -1,34 +1,33 @@
-import cv2
-import torch
-from ultralytics import YOLO
+import os
+import shutil
 
-# YOLOv8 모델 불러오기
-model = YOLO('yolov8x.pt')  # 적절한 가중치 파일 경로를 입력하세요
+# 원본 이미지 폴더 경로
+source_folder = 'dataset/0'
+# 복사할 폴더 경로
+folder1 = 'dataset/train/no_body'
+folder2 = 'dataset/var/no_body'
 
-# 이미지 불러오기
-image_path = 'test.jpg'  # 이미지 파일 경로를 입력하세요
-image = cv2.imread(image_path)
+# 폴더가 없는 경우 생성
+os.makedirs(folder1, exist_ok=True)
+os.makedirs(folder2, exist_ok=True)
 
-# 모델을 사용하여 객체 탐지
-results = model(image)
+# 모든 파일 읽어오기
+all_files = [f for f in os.listdir(source_folder) if f.endswith(('.jpg', '.png', '.jpeg'))]
 
-# 결과를 이미지에 그리기
-for result in results:
-    boxes = result.boxes  # 탐지된 객체의 바운딩 박스
-    for box in boxes:
-        x1, y1, x2, y2 = box.xyxy[0]  # 바운딩 박스 좌표
-        label = int(box.cls)  # 클래스 라벨을 정수형으로 변환
-        conf = float(box.conf)  # 신뢰도를 실수형으로 변환
+# 8대 2 비율로 나누기
+split_point = int(len(all_files) * 0.8)
+files_for_folder1 = all_files[:split_point]
+files_for_folder2 = all_files[split_point:]
 
-        # 바운딩 박스 그리기
-        cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-        cv2.putText(image, f'{label} {conf:.2f}', (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+# 파일 복사 함수
+def copy_files(file_list, destination_folder):
+    for filename in file_list:
+        src_path = os.path.join(source_folder, filename)
+        dst_path = os.path.join(destination_folder, filename)
+        shutil.copy(src_path, dst_path)
 
-# 결과 이미지 저장
-output_path = 'detected_image.jpg'  # 결과 이미지를 저장할 경로를 입력하세요
-cv2.imwrite(output_path, image)
+# 파일 복사
+copy_files(files_for_folder1, folder1)
+copy_files(files_for_folder2, folder2)
 
-# 결과 이미지 보여주기
-cv2.imshow('YOLOv8 Full Body Detection', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+print("파일이 성공적으로 나눠져서 복사되었습니다.")
