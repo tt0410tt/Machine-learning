@@ -1,75 +1,76 @@
-import torch
-import torch.nn as nn
-from torchvision import models, transforms
-from PIL import Image
-import cv2
-import numpy as np
+import os
+import matplotlib.pyplot as plt
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-# 모델 정의 및 수정 (로드와 동일하게 정의)
-model_ft = models.resnet18()
-num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, 1)  # 출력 클래스 수를 2로 설정 (사람 있음 / 없음)
+# TensorBoard 로그 디렉토리 경로
+log_dir = 'runs/detect/train15'
 
-# 모델 로드
-model_ft.load_state_dict(torch.load('person_detection_model.pth'))
-model_ft.eval()  # 평가 모드로 설정
+# 로그 파일을 찾는 함수
+def find_log_file(log_dir):
+    for root, dirs, files in os.walk(log_dir):
+        for file in files:
+            if file.startswith('events.out.tfevents'):
+                return os.path.join(root, file)
+    return None
 
-# 디바이스 설정
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model_ft = model_ft.to(device)
+# 로그 파일 경로
+log_file = find_log_file(log_dir)
 
-# 이미지 전처리
-def preprocess_image(image):
-    input_transforms = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    image = Image.fromarray(image)
-    image = input_transforms(image).unsqueeze(0)
-    return image
+# 로그 파일이 존재하는지 확인
+if log_file is None:
+    print(f"No TensorBoard log file found in {log_dir}")
+else:
+    print(f"Found TensorBoard log file: {log_file}")
 
-# 이미지 슬라이딩 윈도우 및 예측
-def sliding_window(image, model, window_size, step_size):
-    boxes = []
-    img_height, img_width, _ = image.shape
+    # TensorBoard 로그 데이터 불러오기
+    event_acc = EventAccumulator(log_file)
+    event_acc.Reload()
 
-    for y in range(0, img_height - window_size[1] + 1, step_size):
-        for x in range(0, img_width - window_size[0] + 1, step_size):
-            window = image[y:y + window_size[1], x:x + window_size[0]]
-            window_tensor = preprocess_image(window).to(device)
+    # 사용 가능한 모든 키 출력
+    tags = event_acc.Tags()['scalars']
+    print("Available tags:", tags)
 
-            with torch.no_grad():
-                outputs = model(window_tensor)
-                _, preds = torch.max(outputs, 1)
+    # 여기서 올바른 키를 사용하여 데이터를 추출합니다
+    epochs = []
+    box_loss = []
+    obj_loss = []
+    val_mAP_50 = []
+    val_mAP_50_95 = []
 
-            if preds.item() == 0:  # 사람 클래스
-                boxes.append((x, y, x + window_size[0], y + window_size[1]))
-
-    return boxes
-
-# 결과 시각화
-def visualize_prediction(image_path, boxes):
-    image = cv2.imread(image_path)
-    for (x1, y1, x2, y2) in boxes:
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(image, 'Person', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    # 올바른 키 값을 사용하여 데이터 추출
+    for scalar in event_acc.Scalars('train/box_loss'):
+        epochs.append(scalar.step)
+        box_loss.append(scalar.value)
     
-    cv2.imshow('Prediction', image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    cv2.imwrite('detected_image.jpg', image)
+    for scalar in event_acc.Scalars('train/obj_loss'):
+        obj_loss.append(scalar.value)
+    
+    for scalar in event_acc.Scalars('metrics/mAP_0.5'):
+        val_mAP_50.append(scalar.value)
+    
+    for scalar in event_acc.Scalars('metrics/mAP_0.5:0.95'):
+        val_mAP_50_95.append(scalar.value)
 
-# 테스트 이미지 경로
-test_image_path = 'test.jpg'
+    # 그래프 그리기
+    plt.figure(figsize=(12, 10))
 
-# 이미지 로드
-image = cv2.imread(test_image_path)
+    # Training Losses Plot
+    plt.subplot(2, 1, 1)
+    plt.plot(epochs, box_loss, label='Box Loss', color='orange')
+    plt.plot(epochs, obj_loss, label='Objectness Loss', color='blue')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Training Losses')
+    plt.legend()
 
-# 사람 검출 및 바운딩 박스 그리기
-window_size = (128, 128)  # 슬라이딩 윈도우 크기
-step_size = 32  # 슬라이딩 윈도우 이동 간격
-boxes = sliding_window(image, model_ft, window_size, step_size)
+    # mAP Scores Plot
+    plt.subplot(2, 1, 2)
+    plt.plot(epochs, val_mAP_50, label='mAP@0.5', color='blue')
+    plt.plot(epochs, val_mAP_50_95, label='mAP@0.5:0.95', color='orange')
+    plt.xlabel('Epochs')
+    plt.ylabel('mAP')
+    plt.title('mAP Scores')
+    plt.legend()
 
-# 결과 시각화
-visualize_prediction(test_image_path, boxes)
+    plt.tight_layout()
+    plt.show()

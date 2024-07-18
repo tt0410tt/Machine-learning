@@ -1,7 +1,6 @@
 import os
-import random
-import shutil
 import matplotlib.pyplot as plt
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import yaml
 from ultralytics import YOLO
 
@@ -46,40 +45,65 @@ model.save(model_save_path)
 
 print(f"Model saved to {model_save_path}")
 
-# 학습 로그 파일 경로
-log_file_path = os.path.join('runs', 'detect', 'train', 'results.txt')
+# TensorBoard 로그 디렉토리 경로
+log_dir = 'runs/detect/train'
 
-# 로그 파일에서 데이터를 읽어 그래프를 그리는 함수
-def plot_training_log(log_file_path):
+# 로그 파일을 찾는 함수
+def find_log_file(log_dir):
+    for root, dirs, files in os.walk(log_dir):
+        for file in files:
+            if file.startswith('events.out.tfevents'):
+                return os.path.join(root, file)
+    return None
+
+# 로그 파일 경로
+log_file = find_log_file(log_dir)
+
+# 로그 파일이 존재하는지 확인
+if log_file is None:
+    print(f"No TensorBoard log file found in {log_dir}")
+else:
+    print(f"Found TensorBoard log file: {log_file}")
+
+    # TensorBoard 로그 데이터 불러오기
+    event_acc = EventAccumulator(log_file)
+    event_acc.Reload()
+
+    # 사용 가능한 모든 키 출력
+    tags = event_acc.Tags()['scalars']
+    print("Available tags:", tags)
+
+    # 로그에서 필요한 값 추출
     epochs = []
     train_loss = []
-    val_mAP = []
+    val_mAP_50 = []
 
-    with open(log_file_path, 'r') as f:
-        for line in f:
-            if 'Epoch' in line:
-                parts = line.split()
-                epochs.append(int(parts[1].strip(',')))
-                train_loss.append(float(parts[5].strip(',')))
-                val_mAP.append(float(parts[7].strip(',')))
+    # 올바른 키 값을 사용하여 데이터 추출
+    for scalar in event_acc.Scalars('train/box_loss'):
+        epochs.append(scalar.step)
+        train_loss.append(scalar.value)
+    
+    for scalar in event_acc.Scalars('metrics/mAP_0.5'):
+        val_mAP_50.append(scalar.value)
 
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs, train_loss, label='Train Loss')
-    plt.xlabel('Epoch')
+    # 그래프 그리기
+    plt.figure(figsize=(12, 10))
+
+    # Training Losses Plot
+    plt.subplot(2, 1, 1)
+    plt.plot(epochs, train_loss, label='Train Loss', color='orange')
+    plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.title('Train Loss over Epochs')
+    plt.title('Training Losses')
     plt.legend()
 
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs, val_mAP, label='Validation mAP@50')
-    plt.xlabel('Epoch')
-    plt.ylabel('mAP@50')
-    plt.title('Validation mAP@50 over Epochs')
+    # mAP Scores Plot
+    plt.subplot(2, 1, 2)
+    plt.plot(epochs, val_mAP_50, label='mAP@0.5', color='blue')
+    plt.xlabel('Epochs')
+    plt.ylabel('mAP')
+    plt.title('mAP Scores')
     plt.legend()
 
     plt.tight_layout()
     plt.show()
-
-# 로그 파일에서 데이터를 읽어 그래프 그리기
-plot_training_log(log_file_path)
