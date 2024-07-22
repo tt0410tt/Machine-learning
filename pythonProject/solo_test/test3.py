@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 # TensorBoard 로그 디렉토리 경로
-log_dir = 'runs/detect/train15'
+log_dir = 'runs/detect/train'
 
 # 로그 파일을 찾는 함수
 def find_log_file(log_dir):

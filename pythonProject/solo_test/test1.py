@@ -53,7 +53,7 @@ if __name__ == '__main__':
     print(f"Model saved to {model_save_path}")
 
     # TensorBoard 로그 디렉토리 경로
-    log_dir = 'runs/detect/train'
+    log_dir = 'runs/detect/train3'
 
 
     # 로그 파일을 찾는 함수
@@ -77,10 +77,6 @@ if __name__ == '__main__':
         # TensorBoard 로그 데이터 불러오기
         event_acc = EventAccumulator(log_file)
         event_acc.Reload()
-
-        # 사용 가능한 모든 키 출력
-        tags = event_acc.Tags()['scalars']
-        print("Available tags:", tags)
 
         # 로그에서 필요한 값 추출
         epochs = []
