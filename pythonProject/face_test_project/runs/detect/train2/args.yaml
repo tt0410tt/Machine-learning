@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: yolov10n.pt
-data: C:\Users\user\Desktop\workspace\main\Machine-learning\pythonProject\face_test_project\dataset\dataset.yaml
+model: yolov8n.pt
+data: C:\project\Machine-learning\pythonProject\face_test_project\dataset\dataset.yaml
 epochs: 100
 time: null
 patience: 100
@@ -10,7 +10,7 @@ imgsz: 640
 save: true
 save_period: -1
 cache: false
-device: cpu
+device: cuda
 workers: 8
 project: null
 name: train2
