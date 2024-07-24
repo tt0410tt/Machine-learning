@@ -5,12 +5,12 @@ import yaml
 from ultralytics import YOLO
 import torch
 
-if __name__ == '__main__':
+def main():
     # CUDA 설정 확인
-    print(torch.cuda.is_available())  # True여야 GPU가 사용 가능함을 의미
+    print("CUDA Available:", torch.cuda.is_available())  # True여야 GPU가 사용 가능함을 의미
     if torch.cuda.is_available():
-        print(torch.cuda.device_count())  # 사용 가능한 GPU 개수
-        print(torch.cuda.get_device_name(0))  # 첫 번째 GPU 이름
+        print("Number of GPUs:", torch.cuda.device_count())  # 사용 가능한 GPU 개수
+        print("GPU Name:", torch.cuda.get_device_name(0))  # 첫 번째 GPU 이름
 
     # 데이터셋 경로 설정 (절대 경로 사용)
     data_path = os.path.abspath('dataset')
@@ -34,10 +34,10 @@ if __name__ == '__main__':
     with open(dataset_yaml_path, 'w') as f:
         yaml.dump(data_config, f)
 
-    print("Dataset paths are correct. Starting YOLOv8 training...")
+    print("Dataset paths are correct. Starting YOLOv10 training...")
 
-    # 사전 학습된 YOLOv8 모델 불러오기
-    model = YOLO('yolov8n.pt')  # yolov8n.pt, yolov8s.pt 등 다양한 모델 크기 선택 가능
+    # 사전 학습된 YOLOv10 모델 불러오기
+    model = YOLO('yolov10n.pt')  # yolov10n.pt, yolov10s.pt 등 다양한 모델 크기 선택 가능
     # 모델 학습
     print("Training the model...")
     model.train(data=dataset_yaml_path, epochs=100, imgsz=640, device='cuda' if torch.cuda.is_available() else 'cpu')
@@ -53,8 +53,7 @@ if __name__ == '__main__':
     print(f"Model saved to {model_save_path}")
 
     # TensorBoard 로그 디렉토리 경로
-    log_dir = 'runs/detect/train3'
-
+    log_dir = 'runs/detect/train'
 
     # 로그 파일을 찾는 함수
     def find_log_file(log_dir):
@@ -63,7 +62,6 @@ if __name__ == '__main__':
                 if file.startswith('events.out.tfevents'):
                     return os.path.join(root, file)
         return None
-
 
     # 로그 파일 경로
     log_file = find_log_file(log_dir)
@@ -112,3 +110,6 @@ if __name__ == '__main__':
 
         plt.tight_layout()
         plt.show()
+
+if __name__ == '__main__':
+    main()

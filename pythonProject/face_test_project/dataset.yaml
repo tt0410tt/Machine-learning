@@ -1,0 +1,4 @@
+train: C:/Users/user/Desktop/workspace/main/Machine-learning/pythonProject/face_test_project/dataset/images/train
+val: C:/Users/user/Desktop/workspace/main/Machine-learning/pythonProject/face_test_project/dataset/images/val
+nc: 1
+names: ['face']
