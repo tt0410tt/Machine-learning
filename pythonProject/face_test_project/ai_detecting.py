@@ -10,7 +10,6 @@ def train_model():
         print("Number of GPUs:", torch.cuda.device_count())  # 사용 가능한 GPU 개수
         print("GPU Name:", torch.cuda.get_device_name(0))  # 첫 번째 GPU 이름
 
-    # 데이터셋 경로 설정 (절대 경로 사용)
     data_path = os.path.abspath('dataset')
     train_path = os.path.join(data_path, 'images', 'train')
     val_path = os.path.join(data_path, 'images', 'val')
