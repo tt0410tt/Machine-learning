@@ -1,5 +1,6 @@
 import cv2
 import torch
+import time
 from ultralytics import YOLO
 
 # YOLO 모델 로드
@@ -9,12 +10,18 @@ model = YOLO(model_path)
 # 카메라 캡처 시작
 cap = cv2.VideoCapture(0)
 
+# FPS 계산을 위한 초기화
+prev_time = 0
+
 while True:
     # 프레임 읽기
     ret, frame = cap.read()
     if not ret:
         break
 
+    # 현재 시간 기록
+    current_time = time.time()
+    
     # 모델로 예측 수행
     results = model(frame)
 
@@ -29,6 +36,13 @@ while True:
         # 인식률 텍스트 추가
         text = f"{confidence:.2f}"
         cv2.putText(frame, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    # FPS 계산
+    fps = 1 / (current_time - prev_time)
+    prev_time = current_time
+
+    # FPS 출력
+    print(f"FPS: {fps:.2f}")
 
     # 결과 프레임 출력
     cv2.imshow('Face Detection', frame)
