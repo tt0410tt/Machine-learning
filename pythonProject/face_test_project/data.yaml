@@ -1,0 +1,7 @@
+
+names:
+  - person1
+  - other
+nc: 2
+train: C:/Users/user/Desktop/workspace/main/Machine-learning/pythonProject/face_test_project/save_data/person1\train
+val: C:/Users/user/Desktop/workspace/main/Machine-learning/pythonProject/face_test_project/save_data/person1\val

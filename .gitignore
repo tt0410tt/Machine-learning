@@ -4,3 +4,4 @@ pythonProject/solo_test/runs/*
 pythonProject/solo_test/yolov8x.pt
 pythonProject/face_test_project/dataset/*
 pythonProject/face_test_project/runs/*
+pythonProject/face_test_project/save_data/*
