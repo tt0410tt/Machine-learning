@@ -5,3 +5,7 @@ pythonProject/solo_test/yolov8x.pt
 pythonProject/face_test_project/dataset/*
 pythonProject/face_test_project/runs/*
 pythonProject/face_test_project/save_data/*
+pythonProject/face_test_project2/*
+face_detect/yolov8_env/*
+face_detect/dataset/*
+face_detect/result/*
